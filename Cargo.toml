@@ -1,5 +1,5 @@
 [package]
-name = "sni-test"
+name = "view-client-hello"
 version = "0.1.0"
 license = "MIT"
 authors = ["Alex Macleod <alex@macleod.io>"]
@@ -8,7 +8,13 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1"
+rand = "0.7"
 rocket = { version = "0.4", default-features = false }
 rustls = "0.16"
 webpki = "0.21"
-anyhow = "1"
+
+[dependencies.rocket_contrib]
+version = "0.4.2"
+default-features = false
+features = ["handlebars_templates"]
