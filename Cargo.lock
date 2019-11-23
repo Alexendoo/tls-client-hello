@@ -817,18 +817,6 @@ version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "sni-test"
-version = "0.1.0"
-dependencies = [
- "anyhow 1.0.22 (registry+https://github.com/rust-lang/crates.io-index)",
- "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "rocket 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "rocket_contrib 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "rustls 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "webpki 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "sourcefile"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -879,6 +867,18 @@ dependencies = [
  "libc 0.2.65 (registry+https://github.com/rust-lang/crates.io-index)",
  "redox_syscall 0.1.56 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "tls-client-hello"
+version = "0.1.0"
+dependencies = [
+ "anyhow 1.0.22 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rocket 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rocket_contrib 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rustls 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "webpki 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
