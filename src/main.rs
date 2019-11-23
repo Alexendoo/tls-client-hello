@@ -1,33 +1,40 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
-#[macro_use]
-extern crate rocket;
-
 mod tls;
 
 use anyhow::Result;
 use rand::distributions::Alphanumeric;
 use rand::Rng;
 use rocket::State;
+use rocket::{get, routes};
 use rocket_contrib::templates::Template;
+use serde::Serialize;
 use std::collections::HashMap;
 use std::net::TcpListener;
 use std::sync::Mutex;
 
+#[derive(Serialize)]
+struct IndexContext {
+    port: u16,
+    url: String,
+}
+
 #[get("/")]
-fn index(listeners: State<Listeners>) -> Result<String> {
+fn index(listeners: State<Listeners>) -> Result<Template> {
     let listener = TcpListener::bind("localhost:0")?;
-    let port = listener.local_addr()?.port();
 
     let id = rand::thread_rng()
         .sample_iter(Alphanumeric)
         .take(7)
         .collect();
-    let res = format!("port: {}, URL: http://localhost:8000/report/{}", port, id);
 
+    let template = Template::render("index", IndexContext{
+        port: listener.local_addr()?.port(),
+        url: format!("/report/{}", id),
+    });
     listeners.0.lock().unwrap().insert(id, listener);
 
-    Ok(res)
+    Ok(template)
 }
 
 #[get("/report/<report>")]

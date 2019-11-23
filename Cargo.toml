@@ -12,6 +12,7 @@ anyhow = "1"
 rand = "0.7"
 rustls = "0.16"
 webpki = "0.21"
+serde = { version = "1.0", features = ["derive"] }
 
 [dependencies.rocket]
 version = "0.4"
