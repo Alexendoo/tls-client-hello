@@ -3,21 +3,16 @@
 #[macro_use]
 extern crate rocket;
 
-use anyhow::{bail, Context, Result};
-use rand::Rng; 
+mod tls;
+
+use anyhow::Result;
 use rand::distributions::Alphanumeric;
+use rand::Rng;
 use rocket::State;
 use rocket_contrib::templates::Template;
-use rustls::internal::msgs::deframer::MessageDeframer;
-use rustls::internal::msgs::handshake::ClientHelloPayload;
-use rustls::internal::msgs::handshake::HandshakeMessagePayload;
-use rustls::internal::msgs::handshake::HandshakePayload;
-use rustls::internal::msgs::hsjoiner::HandshakeJoiner;
-use rustls::internal::msgs::message::Message;
-use rustls::internal::msgs::message::MessagePayload;
-use std::net::{TcpListener, TcpStream};
-use std::sync::Mutex;
 use std::collections::HashMap;
+use std::net::TcpListener;
+use std::sync::Mutex;
 
 #[get("/")]
 fn index(listeners: State<Listeners>) -> Result<String> {
@@ -43,38 +38,11 @@ fn report(report: String, listeners: State<Listeners>) -> Result<Option<String>>
     };
 
     let (mut stream, _) = listener.accept()?;
-    let hello = get_client_hello(&mut stream)?;
+    let hello = tls::get_client_hello(&mut stream)?;
 
     let response = format!("{:#?}", hello);
 
     Ok(Some(response))
-}
-
-fn get_client_hello(stream: &mut TcpStream) -> Result<ClientHelloPayload> {
-    let mut joiner = HandshakeJoiner::new();
-    let mut deframer = MessageDeframer::new();
-
-    while joiner.frames.is_empty() {
-        deframer.read(stream)?;
-
-        for frame in deframer.frames.drain(..) {
-            joiner.take_message(frame).context("Corrupt TLS Message")?;
-        }
-    }
-
-    if let Some(Message {
-        payload:
-            MessagePayload::Handshake(HandshakeMessagePayload {
-                payload: HandshakePayload::ClientHello(hello),
-                ..
-            }),
-        ..
-    }) = joiner.frames.into_iter().next()
-    {
-        return Ok(hello);
-    }
-
-    bail!("Expected ClientHello");
 }
 
 #[derive(Default)]
@@ -82,7 +50,7 @@ struct Listeners(Mutex<HashMap<String, TcpListener>>);
 
 fn main() {
     let listeners = Listeners::default();
-    
+
     rocket::ignite()
         .attach(Template::fairing())
         .manage(listeners)
