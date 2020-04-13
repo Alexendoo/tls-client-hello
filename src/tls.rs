@@ -1,36 +1,29 @@
-use anyhow::{bail, Context, Result};
-use rustls::internal::msgs::deframer::MessageDeframer;
-use rustls::internal::msgs::handshake::ClientHelloPayload;
-use rustls::internal::msgs::handshake::HandshakeMessagePayload;
-use rustls::internal::msgs::handshake::HandshakePayload;
-use rustls::internal::msgs::hsjoiner::HandshakeJoiner;
-use rustls::internal::msgs::message::Message;
-use rustls::internal::msgs::message::MessagePayload;
+use anyhow::{ensure, bail, Context, Result};
+use std::io::{self, ErrorKind};
+use std::io::prelude::*;
 use std::net::TcpStream;
+use tls_parser::tls::{parse_tls_plaintext, TlsPlaintext, MAX_RECORD_LEN};
+use nom::Err;
 
-pub fn get_client_hello(stream: &mut TcpStream) -> Result<ClientHelloPayload> {
-    let mut joiner = HandshakeJoiner::new();
-    let mut deframer = MessageDeframer::new();
+pub fn get_client_hello(stream: &mut TcpStream) -> Result<()> {
+    let mut buffer = [0; MAX_RECORD_LEN as usize];
 
-    while joiner.frames.is_empty() {
-        deframer.read(stream)?;
+    let written = dbg!(stream.read(&mut buffer)?);
+    ensure!(written > 0, io::Error::new(ErrorKind::UnexpectedEof, ""));
 
-        for frame in deframer.frames.drain(..) {
-            joiner.take_message(frame).context("Corrupt TLS Message")?;
+    let res = dbg!(parse_tls_plaintext(&buffer[..written]));
+
+    match res {
+        Ok((_rem, record)) => {
+            dbg!(record);
+        }
+        Err(Err::Incomplete(needed)) => {
+            dbg!(needed);
+        }
+        Err(e) => {
+            dbg!(e);
         }
     }
 
-    if let Some(Message {
-        payload:
-            MessagePayload::Handshake(HandshakeMessagePayload {
-                payload: HandshakePayload::ClientHello(hello),
-                ..
-            }),
-        ..
-    }) = joiner.frames.into_iter().next()
-    {
-        return Ok(hello);
-    }
-
-    bail!("Expected ClientHello");
+    Ok(())
 }

@@ -58,9 +58,20 @@ struct Listeners(Mutex<HashMap<String, TcpListener>>);
 fn main() {
     let listeners = Listeners::default();
 
-    rocket::ignite()
-        .attach(Template::fairing())
-        .manage(listeners)
-        .mount("/", routes![index, report])
-        .launch();
+    m2().unwrap();
+
+    // rocket::ignite()
+    //     .attach(Template::fairing())
+    //     .manage(listeners)
+    //     .mount("/", routes![index, report])
+    //     .launch();
+}
+
+fn m2() -> Result<()> {
+    let listener = TcpListener::bind("localhost:4302")?;
+    let (mut socket, _) = listener.accept()?;
+
+    tls::get_client_hello(&mut socket)?;
+
+    Ok(())
 }

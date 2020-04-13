@@ -9,10 +9,10 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1"
+nom = "5"
 rand = "0.7"
-rustls = "0.16"
-webpki = "0.21"
 serde = { version = "1.0", features = ["derive"] }
+tls-parser = "0.9"
 
 [dependencies.rocket]
 version = "0.4"
