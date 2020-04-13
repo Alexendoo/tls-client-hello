@@ -47,9 +47,7 @@ fn report(report: String, listeners: State<Listeners>) -> Result<Option<String>>
     let (mut stream, _) = listener.accept()?;
     let hello = tls::get_client_hello(&mut stream)?;
 
-    let response = format!("{:#?}", hello);
-
-    Ok(Some(response))
+    Ok(Some(hello))
 }
 
 #[derive(Default)]
@@ -58,20 +56,9 @@ struct Listeners(Mutex<HashMap<String, TcpListener>>);
 fn main() {
     let listeners = Listeners::default();
 
-    m2().unwrap();
-
-    // rocket::ignite()
-    //     .attach(Template::fairing())
-    //     .manage(listeners)
-    //     .mount("/", routes![index, report])
-    //     .launch();
-}
-
-fn m2() -> Result<()> {
-    let listener = TcpListener::bind("localhost:4302")?;
-    let (mut socket, _) = listener.accept()?;
-
-    tls::get_client_hello(&mut socket)?;
-
-    Ok(())
+    rocket::ignite()
+        .attach(Template::fairing())
+        .manage(listeners)
+        .mount("/", routes![index, report])
+        .launch();
 }
