@@ -28,10 +28,13 @@ fn index(listeners: State<Listeners>) -> Result<Template> {
         .take(7)
         .collect();
 
-    let template = Template::render("index", IndexContext{
-        port: listener.local_addr()?.port(),
-        url: format!("/report/{}", id),
-    });
+    let template = Template::render(
+        "index",
+        IndexContext {
+            port: listener.local_addr()?.port(),
+            url: format!("/report/{}", id),
+        },
+    );
     listeners.0.lock().unwrap().insert(id, listener);
 
     Ok(template)
