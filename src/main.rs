@@ -32,7 +32,7 @@ fn index(listeners: State<Listeners>) -> Result<Template> {
         "index",
         IndexContext {
             port: listener.local_addr()?.port(),
-            url: format!("/report/{}", id),
+            url: format!("/report/{}/", id),
         },
     );
     listeners.0.lock().unwrap().insert(id, listener);
@@ -41,7 +41,7 @@ fn index(listeners: State<Listeners>) -> Result<Template> {
 }
 
 #[get("/report/<report>")]
-fn report(report: String, listeners: State<Listeners>) -> Result<Option<String>> {
+fn report(report: String, listeners: State<Listeners>) -> Result<Option<Template>> {
     let listener = match listeners.0.lock().unwrap().remove(&report) {
         Some(listener) => listener,
         None => return Ok(None),
